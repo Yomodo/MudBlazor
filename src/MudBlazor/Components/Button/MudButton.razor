@@ -14,17 +14,17 @@
             disabled="@GetDisabledState()"
             ClickPropagation="@ClickPropagation">
     <span class="mud-button-label">
-        @if (!string.IsNullOrWhiteSpace(StartIcon))
+        @if (IconData.StartIcon())
         {
             <span class="@StartIconClass">
-                <MudIcon Icon="@StartIcon" Size="@(IconSize ?? Size)" Color="@IconColor" />
+                <MudIcon IconProperties="@IconData" />
             </span>
         }
         @ChildContent
-        @if (!string.IsNullOrWhiteSpace(EndIcon))
+        @if (IconData.EndIcon())
         {
             <span class="@EndIconClass">
-                <MudIcon Icon="@EndIcon" Size="@(IconSize ?? Size)" Color="@IconColor" />
+                <MudIcon IconProperties="@IconData" />
             </span>
         }
     </span>

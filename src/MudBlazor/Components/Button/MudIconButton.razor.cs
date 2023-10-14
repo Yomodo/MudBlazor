@@ -15,13 +15,41 @@ namespace MudBlazor
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-size-{Size.ToDescriptionString()}", AsButton)
                 .AddClass($"mud-ripple", !DisableRipple)
                 .AddClass($"mud-ripple-icon", !DisableRipple && !AsButton)
-                .AddClass($"mud-icon-button-size-{Size.ToDescriptionString()}", when: () => Size != Size.Medium)
+                .AddClass($"mud-icon-button-size-{IconData.Size.ToDescriptionString()}", when: () => IconData.Size != Size.Medium)
                 .AddClass($"mud-icon-button-edge-{Edge.ToDescriptionString()}", when: () => Edge != Edge.False)
                 .AddClass($"mud-button-disable-elevation", DisableElevation)
                 .AddClass(Class)
                 .Build();
 
         protected bool AsButton => Variant != Variant.Text;
+
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+
+            if (IconProperties is not null)
+            {
+                IconData = IconProperties;
+
+                // Backwards compatibility
+
+                if (IconData.HasIcon()) Icon = IconData.Icon;
+                if (IconData.HasTitle()) Title = IconData.Title;
+            }
+            else
+            {
+                IconData.Icon = Icon;
+                IconData.Title = Title;
+                IconData.Size = Size;
+            }
+        }
+
+        /// <summary>
+        /// The icon properties.
+        /// </summary>
+        [Parameter]
+        [Category(CategoryTypes.Icon.Behavior)]
+        public IconProperties? IconProperties { get; set; }
 
         /// <summary>
         /// The Icon that will be used in the component.

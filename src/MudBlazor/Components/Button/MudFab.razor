@@ -12,17 +12,17 @@
             target="@Target"
             rel="@GetRel()"
             disabled="@GetDisabledState()"
-            title="@Title"
+            title="@IconData.Title"
             ClickPropagation="@ClickPropagation">
     <span class="mud-fab-label">
-        @if (!string.IsNullOrWhiteSpace(StartIcon))
+        @if (IconData.StartIcon())
         {
-            <MudIcon Icon="@StartIcon" Color="@IconColor" Size="@IconSize" />
+            <MudIcon IconProperties="@IconData" />
         }
         @Label
-        @if (!string.IsNullOrWhiteSpace(EndIcon))
+        @if (IconData.EndIcon())
         {
-            <MudIcon Icon="@EndIcon" Color="@IconColor" Size="@IconSize" />
+            <MudIcon IconProperties="@IconData" />
         }
     </span>
 </MudElement>

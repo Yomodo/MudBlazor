@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System;
+using Microsoft.AspNetCore.Components;
 using MudBlazor.Utilities;
 
 namespace MudBlazor
@@ -19,15 +20,51 @@ namespace MudBlazor
 
         protected string StartIconClass =>
             new CssBuilder("mud-button-icon-start")
-                .AddClass($"mud-button-icon-size-{(IconSize ?? Size).ToDescriptionString()}")
-                .AddClass(IconClass)
+                .AddClass($"mud-button-icon-size-{IconData.Size.ToDescriptionString()}")
+                .AddClass(IconData.Class)
                 .Build();
 
         protected string EndIconClass =>
             new CssBuilder("mud-button-icon-end")
-                .AddClass($"mud-button-icon-size-{(IconSize ?? Size).ToDescriptionString()}")
-                .AddClass(IconClass)
+                .AddClass($"mud-button-icon-size-{IconData.Size.ToDescriptionString()}")
+                .AddClass(IconData.Class)
                 .Build();
+
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+
+            var hasStartIcon = StartIcon?.AsSpan().Trim().Length > 0;
+            var hasEndIcon = EndIcon.AsSpan().Trim().Length > 0;
+
+            if (IconProperties is not null)
+            {
+                IconData = IconProperties;
+                if (IconData.HasIcon())
+                {
+                    // Backwards compatibility
+
+                    if (hasStartIcon) StartIcon = IconData.Icon;
+                    else if (hasEndIcon) EndIcon = IconData.Icon;
+                }
+            }
+            else
+            {
+                IconData.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
+                IconData.Size = IconSize ?? Size;
+                IconData.Color = IconColor;
+                IconData.Class = IconClass;
+            }
+
+            IconData.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
+        }
+
+        /// <summary>
+        /// The icon properties.
+        /// </summary>
+        [Parameter]
+        [Category(CategoryTypes.Icon.Behavior)]
+        public IconProperties? IconProperties { get; set; }
 
         /// <summary>
         /// Icon placed before the text if set.

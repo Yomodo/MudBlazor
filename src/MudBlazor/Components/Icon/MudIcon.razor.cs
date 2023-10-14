@@ -8,12 +8,44 @@ namespace MudBlazor
     {
         protected string Classname =>
             new CssBuilder("mud-icon-root")
-                .AddClass("mud-icon-default", Color == Color.Default)
-                .AddClass("mud-svg-icon", !string.IsNullOrEmpty(Icon) && Icon.Trim().StartsWith("<"))
-                .AddClass($"mud-{Color.ToDescriptionString()}-text", Color != Color.Default && Color != Color.Inherit)
-                .AddClass($"mud-icon-size-{Size.ToDescriptionString()}")
-                .AddClass(Class)
+                .AddClass("mud-icon-default", IconData.HasDefaultColor())
+                .AddClass("mud-svg-icon", IconData.IsSvg())
+                .AddClass($"mud-{IconData.Color.ToDescriptionString()}-text", IconData.HasCustomColor())
+                .AddClass($"mud-icon-size-{IconData.Size.ToDescriptionString()}")
+                .AddClass(IconData.Class, IconData.HasClass())
                 .Build();
+
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+
+            if (IconProperties is not null)
+            {
+                IconData = IconProperties;
+                
+                // Backwards compatibility
+
+                if (IconData.HasIcon()) Icon = IconData.Icon;
+                if (IconData.HasTitle()) Title = IconData.Title;
+                if (IconData.HasStyle()) Style = IconData.Style;
+            }
+            else
+            {
+                IconData.Icon = Icon;
+                IconData.Title = Title;
+                IconData.Size = Size;
+                IconData.Color = Color;
+                IconData.Style = Style;
+                IconData.ViewBox = ViewBox;
+            }
+        }
+
+        /// <summary>
+        /// The icon properties.
+        /// </summary>
+        [Parameter]
+        [Category(CategoryTypes.Icon.Behavior)]
+        public IconProperties? IconProperties { get; set; }
 
         /// <summary>
         /// Icon to be used can either be svg paths for font icons.

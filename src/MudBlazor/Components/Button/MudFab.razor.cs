@@ -17,6 +17,44 @@ namespace MudBlazor
                 .AddClass(Class)
                 .Build();
 
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+
+            var hasStartIcon = StartIcon?.AsSpan().Trim().Length > 0;
+            var hasEndIcon = EndIcon.AsSpan().Trim().Length > 0;
+
+            if (IconProperties is not null)
+            {
+                IconData = IconProperties;
+                if (IconData.HasIcon())
+                {
+                    // Backwards compatibility
+
+                    if (hasStartIcon) StartIcon = IconData.Icon;
+                    else if (hasEndIcon) EndIcon = IconData.Icon;
+                }
+
+                if (IconData.HasTitle()) Title = IconData.Title;
+            }
+            else
+            {
+                IconData.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
+                IconData.Title = Title;
+                IconData.Size = IconSize;
+                IconData.Color = IconColor;
+            }
+
+            IconData.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
+        }
+
+        /// <summary>
+        /// The icon properties.
+        /// </summary>
+        [Parameter]
+        [Category(CategoryTypes.Icon.Behavior)]
+        public IconProperties? IconProperties { get; set; }
+
         /// <summary>
         /// The color of the component. It supports the theme colors.
         /// </summary>

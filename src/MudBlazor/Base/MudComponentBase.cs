@@ -45,6 +45,11 @@ namespace MudBlazor
         public Dictionary<string, object?> UserAttributes { get; set; } = new Dictionary<string, object?>();
 
         /// <summary>
+        /// The component's icon properties.
+        /// </summary>
+        protected IconProperties IconData { get; set; } = new();
+
+        /// <summary>
         /// Gets or sets a value indicating whether <see cref="JSRuntime" /> is available.
         /// </summary>
         protected bool IsJSRuntimeAvailable { get; set; }
