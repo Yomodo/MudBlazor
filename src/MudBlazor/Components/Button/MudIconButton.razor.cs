@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor.Extensions;
 using MudBlazor.Utilities;
 
 namespace MudBlazor
@@ -15,7 +16,7 @@ namespace MudBlazor
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-size-{Size.ToDescriptionString()}", AsButton)
                 .AddClass($"mud-ripple", !DisableRipple)
                 .AddClass($"mud-ripple-icon", !DisableRipple && !AsButton)
-                .AddClass($"mud-icon-button-size-{IconData.Size.ToDescriptionString()}", when: () => IconData.Size != Size.Medium)
+                .AddClass($"mud-icon-button-size-{_iconProperties.Size.ToDescriptionString()}", when: () => _iconProperties.Size != Size.Medium)
                 .AddClass($"mud-icon-button-edge-{Edge.ToDescriptionString()}", when: () => Edge != Edge.False)
                 .AddClass($"mud-button-disable-elevation", DisableElevation)
                 .AddClass(Class)
@@ -29,20 +30,23 @@ namespace MudBlazor
 
             if (IconProperties is not null)
             {
-                IconData = IconProperties;
+                _iconProperties = IconProperties;
 
                 // Backwards compatibility
 
-                if (IconData.HasIcon()) Icon = IconData.Icon;
-                if (IconData.HasTitle()) Title = IconData.Title;
+                if (_iconProperties.HasIcon()) Icon = _iconProperties.Icon;
+                if (_iconProperties.HasTitle()) Title = _iconProperties.Title;
             }
             else
             {
-                IconData.Icon = Icon;
-                IconData.Title = Title;
-                IconData.Size = Size;
+                _iconProperties.Icon = Icon;
+                _iconProperties.Title = Title;
+                _iconProperties.Size = Size;
             }
         }
+
+
+        IconProperties _iconProperties = new();
 
         /// <summary>
         /// The icon properties.

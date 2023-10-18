@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Components;
+using MudBlazor.Extensions;
 using MudBlazor.Utilities;
 
 namespace MudBlazor
@@ -26,27 +27,30 @@ namespace MudBlazor
 
             if (IconProperties is not null)
             {
-                IconData = IconProperties;
-                if (IconData.HasIcon())
+                _iconProperties = IconProperties;
+                if (_iconProperties.HasIcon())
                 {
                     // Backwards compatibility
 
-                    if (hasStartIcon) StartIcon = IconData.Icon;
-                    else if (hasEndIcon) EndIcon = IconData.Icon;
+                    if (hasStartIcon) StartIcon = _iconProperties.Icon;
+                    else if (hasEndIcon) EndIcon = _iconProperties.Icon;
                 }
 
-                if (IconData.HasTitle()) Title = IconData.Title;
+                if (_iconProperties.HasTitle()) Title = _iconProperties.Title;
             }
             else
             {
-                IconData.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
-                IconData.Title = Title;
-                IconData.Size = IconSize;
-                IconData.Color = IconColor;
+                _iconProperties.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
+                _iconProperties.Title = Title;
+                _iconProperties.Size = IconSize;
+                _iconProperties.Color = IconColor;
             }
 
-            IconData.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
+            _iconProperties.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
         }
+
+
+        IconProperties _iconProperties = new();
 
         /// <summary>
         /// The icon properties.

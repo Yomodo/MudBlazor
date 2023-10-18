@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor.Extensions;
 using MudBlazor.Utilities;
 
 namespace MudBlazor
@@ -8,11 +9,11 @@ namespace MudBlazor
     {
         protected string Classname =>
             new CssBuilder("mud-icon-root")
-                .AddClass("mud-icon-default", IconData.HasDefaultColor())
-                .AddClass("mud-svg-icon", IconData.IsSvg())
-                .AddClass($"mud-{IconData.Color.ToDescriptionString()}-text", IconData.HasCustomColor())
-                .AddClass($"mud-icon-size-{IconData.Size.ToDescriptionString()}")
-                .AddClass(IconData.Class, IconData.HasClass())
+                .AddClass("mud-icon-default", _iconProperties.HasDefaultColor())
+                .AddClass("mud-svg-icon", _iconProperties.IsSvg())
+                .AddClass($"mud-{_iconProperties.Color.ToDescriptionString()}-text", _iconProperties.HasCustomColor())
+                .AddClass($"mud-icon-size-{_iconProperties.Size.ToDescriptionString()}")
+                .AddClass(_iconProperties.Class, _iconProperties.HasClass())
                 .Build();
 
         protected override void OnParametersSet()
@@ -21,24 +22,27 @@ namespace MudBlazor
 
             if (IconProperties is not null)
             {
-                IconData = IconProperties;
+                _iconProperties = IconProperties;
                 
                 // Backwards compatibility
 
-                if (IconData.HasIcon()) Icon = IconData.Icon;
-                if (IconData.HasTitle()) Title = IconData.Title;
-                if (IconData.HasStyle()) Style = IconData.Style;
+                if (_iconProperties.HasIcon()) Icon = _iconProperties.Icon;
+                if (_iconProperties.HasTitle()) Title = _iconProperties.Title;
+                if (_iconProperties.HasStyle()) Style = _iconProperties.Style;
             }
             else
             {
-                IconData.Icon = Icon;
-                IconData.Title = Title;
-                IconData.Size = Size;
-                IconData.Color = Color;
-                IconData.Style = Style;
-                IconData.ViewBox = ViewBox;
+                _iconProperties.Icon = Icon;
+                _iconProperties.Title = Title;
+                _iconProperties.Size = Size;
+                _iconProperties.Color = Color;
+                _iconProperties.Style = Style;
+                _iconProperties.ViewBox = ViewBox;
             }
         }
+
+
+        IconProperties _iconProperties = new();
 
         /// <summary>
         /// The icon properties.

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Components;
+using MudBlazor.Extensions;
 using MudBlazor.Utilities;
 
 namespace MudBlazor
@@ -20,14 +21,14 @@ namespace MudBlazor
 
         protected string StartIconClass =>
             new CssBuilder("mud-button-icon-start")
-                .AddClass($"mud-button-icon-size-{IconData.Size.ToDescriptionString()}")
-                .AddClass(IconData.Class)
+                .AddClass($"mud-button-icon-size-{_iconProperties.Size.ToDescriptionString()}")
+                .AddClass(_iconProperties.Class)
                 .Build();
 
         protected string EndIconClass =>
             new CssBuilder("mud-button-icon-end")
-                .AddClass($"mud-button-icon-size-{IconData.Size.ToDescriptionString()}")
-                .AddClass(IconData.Class)
+                .AddClass($"mud-button-icon-size-{_iconProperties.Size.ToDescriptionString()}")
+                .AddClass(_iconProperties.Class)
                 .Build();
 
         protected override void OnParametersSet()
@@ -39,25 +40,28 @@ namespace MudBlazor
 
             if (IconProperties is not null)
             {
-                IconData = IconProperties;
-                if (IconData.HasIcon())
+                _iconProperties = IconProperties;
+                if (_iconProperties.HasIcon())
                 {
                     // Backwards compatibility
 
-                    if (hasStartIcon) StartIcon = IconData.Icon;
-                    else if (hasEndIcon) EndIcon = IconData.Icon;
+                    if (hasStartIcon) StartIcon = _iconProperties.Icon;
+                    else if (hasEndIcon) EndIcon = _iconProperties.Icon;
                 }
             }
             else
             {
-                IconData.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
-                IconData.Size = IconSize ?? Size;
-                IconData.Color = IconColor;
-                IconData.Class = IconClass;
+                _iconProperties.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
+                _iconProperties.Size = IconSize ?? Size;
+                _iconProperties.Color = IconColor;
+                _iconProperties.Class = IconClass;
             }
 
-            IconData.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
+            _iconProperties.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
         }
+
+
+        IconProperties _iconProperties = new();
 
         /// <summary>
         /// The icon properties.
