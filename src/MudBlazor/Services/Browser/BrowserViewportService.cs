@@ -13,6 +13,7 @@ using Microsoft.JSInterop;
 using MudBlazor.Extensions;
 using MudBlazor.Interop;
 using MudBlazor.Services;
+using MudBlazor.Utilities.AsyncKeyedLocker;
 using MudBlazor.Utilities.ObserverManager;
 
 namespace MudBlazor;
@@ -26,7 +27,8 @@ namespace MudBlazor;
 /// </remarks>
 internal class BrowserViewportService : IBrowserViewportService
 {
-    private readonly SemaphoreSlim _semaphore;
+    private bool _disposed;
+    private readonly AsyncKeyedLocker<Guid> _semaphore;
     private readonly ResizeListenerInterop _resizeListenerInterop;
     private readonly ObserverManager<BrowserViewportSubscription, IBrowserViewportObserver> _observerManager;
     private readonly Lazy<DotNetObjectReference<BrowserViewportService>> _dotNetReferenceLazy;
@@ -51,7 +53,10 @@ internal class BrowserViewportService : IBrowserViewportService
     public BrowserViewportService(ILogger<BrowserViewportService> logger, IJSRuntime jsRuntime, IOptions<ResizeOptions>? options = null)
     {
         ResizeOptions = options?.Value ?? new ResizeOptions();
-        _semaphore = new SemaphoreSlim(1, 1);
+        _semaphore = new AsyncKeyedLocker<Guid>(lockOptions =>
+        {
+            lockOptions.PoolSize = 10000;
+        });
         _resizeListenerInterop = new ResizeListenerInterop(jsRuntime);
         _observerManager = new ObserverManager<BrowserViewportSubscription, IBrowserViewportObserver>(logger);
         _dotNetReferenceLazy = new Lazy<DotNetObjectReference<BrowserViewportService>>(CreateDotNetObjectReference);
@@ -91,10 +96,13 @@ internal class BrowserViewportService : IBrowserViewportService
     {
         ArgumentNullException.ThrowIfNull(observer);
 
-        try
+        if (_disposed)
         {
-            await _semaphore.WaitAsync();
+            return;
+        }
 
+        using (await _semaphore.LockAsync(observer.Id))
+        {
             // Always clone the ResizeOptions, regardless of the circumstances.
             // This is necessary because the options may originate from the "ResizeOptions" variable (IOptions<ResizeOptions>) - these are the user-defined options when adding this service in the DI container.
             // Only the user should be allowed to modify these settings, and the service should not directly modify the reference to prevent potential bugs.
@@ -121,10 +129,6 @@ internal class BrowserViewportService : IBrowserViewportService
                     await observer.NotifyBrowserViewportChangeAsync(new BrowserViewportEventArgs(subscription.JavaScriptListenerId, latestWindowSize, latestBreakpoint, isImmediate: true));
                 }
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
@@ -155,18 +159,13 @@ internal class BrowserViewportService : IBrowserViewportService
     /// <inheritdoc />
     public async Task UnsubscribeAsync(Guid observerId)
     {
-        try
+        using (await _semaphore.LockAsync(observerId))
         {
-            await _semaphore.WaitAsync();
             var subscription = await RemoveJavaScriptListener(observerId);
             if (subscription is not null)
             {
                 _observerManager.Unsubscribe(subscription);
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
@@ -257,24 +256,30 @@ internal class BrowserViewportService : IBrowserViewportService
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
-        var jsListenerIds = _observerManager
-            .Observers
-            .Keys
-            .Select(x=> x.JavaScriptListenerId)
-            .Distinct()
-            .ToArray();
+        return DisposeAsyncCore(true);
+    }
 
-        if (jsListenerIds.Length > 0)
+    private ValueTask DisposeAsyncCore(bool disposing)
+    {
+        if (!_disposed)
         {
-            //https://github.com/MudBlazor/MudBlazor/pull/5367#issuecomment-1258649968
-            //Fixed in NET8
-            _ = _resizeListenerInterop.CancelListeners(jsListenerIds);
-        }
-        _observerManager.Clear();
+            if (disposing)
+            {
+                _observerManager.Clear();
 
-        if (_dotNetReferenceLazy.IsValueCreated)
-        {
-            _dotNetReferenceLazy.Value.Dispose();
+                if (_dotNetReferenceLazy.IsValueCreated)
+                {
+                    _dotNetReferenceLazy.Value.Dispose();
+                }
+
+                _semaphore.Dispose();
+
+                // https://github.com/MudBlazor/MudBlazor/pull/5367#issuecomment-1258649968
+                // Fixed in NET8
+                _ = _resizeListenerInterop.Dispose();
+            }
+
+            _disposed = true;
         }
 
         return ValueTask.CompletedTask;
@@ -291,7 +296,7 @@ internal class BrowserViewportService : IBrowserViewportService
     {
         var subscription = _observerManager
             .Observers
-            .Select(x=> x.Key)
+            .Select(x => x.Key)
             .FirstOrDefault(x => x.ObserverId == observerId);
 
         return subscription;
@@ -308,7 +313,7 @@ internal class BrowserViewportService : IBrowserViewportService
         var javaScriptListenerId = _observerManager
             .Observers
             .Where(x => clonedOptions.Equals(x.Key.Options ?? clonedOptions) || x.Key.ObserverId == observerId)
-            .Select(x=> x.Key.JavaScriptListenerId)
+            .Select(x => x.Key.JavaScriptListenerId)
             .FirstOrDefault();
 
         // This implementation serves as an optimization to avoid creating a new JavaScript "listener" each time a subscription occurs.

@@ -59,7 +59,7 @@ namespace MudBlazor.Docs.Services
             .AddItem("Paper", typeof(MudPaper))
             .AddItem("Rating", typeof(MudRating), typeof(MudRatingItem))
             .AddItem("Skeleton", typeof(MudSkeleton))
-            .AddItem("Table", typeof(MudTable<T>))
+            .AddItem("Table", typeof(MudTable<T>), typeof(MudTablePager))
             .AddItem("Data Grid", typeof(MudDataGrid<T>))
             .AddItem("Simple Table", typeof(MudSimpleTable))
             .AddItem("Tooltip", typeof(MudTooltip))
@@ -79,6 +79,7 @@ namespace MudBlazor.Docs.Services
             .AddItem("Pagination", typeof(MudPagination))
             .AddItem("Stack", typeof(MudStack))
             .AddItem("Spacer", typeof(MudSpacer))
+            .AddItem("Collapse", typeof(MudCollapse))
 
             //GROUPS
 
@@ -95,6 +96,7 @@ namespace MudBlazor.Docs.Services
                 .AddItem("Autocomplete", typeof(MudAutocomplete<T>))
                 .AddItem("Field", typeof(MudField))
                 .AddItem("File Upload", typeof(MudFileUpload<T>))
+                .AddItem("ToggleGroup", typeof(MudToggleGroup<T>), typeof(MudToggleItem<T>))
             )
 
             //Pickers
@@ -120,6 +122,7 @@ namespace MudBlazor.Docs.Services
                 .AddItem("Line Chart", typeof(Line))
                 .AddItem("Pie Chart", typeof(Pie))
                 .AddItem("Bar Chart", typeof(Bar))
+                .AddItem("Stacked Bar Chart", typeof(StackedBar))
             )
             // this must be last!
             .GetComponentsSortedByName();
