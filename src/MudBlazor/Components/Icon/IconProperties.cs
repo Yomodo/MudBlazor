@@ -72,7 +72,7 @@ public class IconProperties
     public bool Focusable { get; set; }
 
     /// <summary>
-    /// Theattribute to indicates whether the element is exposed to an accessibility API.
+    /// The attribute to indicate whether the element is exposed to an accessibility API.
     /// </summary>
     /// <remarks>The default is <c>true</c></remarks>
     public bool AriaHidden { get; set; } = true;
