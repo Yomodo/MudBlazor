@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
-using MudBlazor.Extensions;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using MudBlazor.Utilities;
-using System.Threading.Tasks;
 
 namespace MudBlazor
 {
@@ -15,46 +14,15 @@ namespace MudBlazor
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}", AsButton)
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-{Color.ToDescriptionString()}", AsButton)
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-size-{Size.ToDescriptionString()}", AsButton)
-                .AddClass($"mud-ripple", !DisableRipple)
-                .AddClass($"mud-ripple-icon", !DisableRipple && !AsButton)
-                .AddClass($"mud-icon-button-size-{_iconProperties.Size.ToDescriptionString()}", when: () => _iconProperties.Size != Size.Medium)
+                .AddClass($"mud-ripple", Ripple)
+                .AddClass($"mud-ripple-icon", Ripple && !AsButton)
+                .AddClass($"mud-icon-button-size-{Size.ToDescriptionString()}", when: () => Size != Size.Medium)
                 .AddClass($"mud-icon-button-edge-{Edge.ToDescriptionString()}", when: () => Edge != Edge.False)
-                .AddClass($"mud-button-disable-elevation", DisableElevation)
+                .AddClass($"mud-button-disable-elevation", !DropShadow)
                 .AddClass(Class)
                 .Build();
 
         protected bool AsButton => Variant != Variant.Text;
-
-        protected override void OnParametersSet()
-        {
-            base.OnParametersSet();
-
-            if (IconProperties is not null)
-            {
-                _iconProperties = IconProperties;
-
-                // Backwards compatibility
-
-                if (_iconProperties.HasIcon()) Icon = _iconProperties.Icon;
-                if (_iconProperties.HasTitle()) Title = _iconProperties.Title;
-            }
-            else
-            {
-                _iconProperties.Icon = Icon;
-                _iconProperties.Title = Title;
-                _iconProperties.Size = Size;
-            }
-        }
-
-
-        IconProperties _iconProperties = new();
-
-        /// <summary>
-        /// The icon properties.
-        /// </summary>
-        [Parameter]
-        [Category(CategoryTypes.Icon.Behavior)]
-        public IconProperties? IconProperties { get; set; }
 
         /// <summary>
         /// The Icon that will be used in the component.
@@ -62,13 +30,6 @@ namespace MudBlazor
         [Parameter]
         [Category(CategoryTypes.Button.Behavior)]
         public string? Icon { get; set; }
-
-        /// <summary>
-        /// Title of the icon used for accessibility.
-        /// </summary>
-        [Parameter]
-        [Category(CategoryTypes.Button.Behavior)]
-        public string? Title { get; set; }
 
         /// <summary>
         /// The color of the component. It supports the theme colors.

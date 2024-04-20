@@ -1,8 +1,6 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using MudBlazor.Extensions;
 using MudBlazor.Utilities;
-using System.Threading.Tasks;
 
 namespace MudBlazor
 {
@@ -15,61 +13,22 @@ namespace MudBlazor
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-{Color.ToDescriptionString()}")
                 .AddClass($"mud-button-{Variant.ToDescriptionString()}-size-{Size.ToDescriptionString()}")
                 .AddClass($"mud-width-full", FullWidth)
-                .AddClass($"mud-ripple", !DisableRipple)
-                .AddClass($"mud-button-disable-elevation", DisableElevation)
+                .AddClass($"mud-ripple", Ripple)
+                .AddClass($"mud-button-disable-elevation", !DropShadow)
                 .AddClass(Class)
                 .Build();
 
         protected string StartIconClass =>
             new CssBuilder("mud-button-icon-start")
-                .AddClass($"mud-button-icon-size-{_iconProperties.Size.ToDescriptionString()}")
-                .AddClass(_iconProperties.Class)
+                .AddClass($"mud-button-icon-size-{(IconSize ?? Size).ToDescriptionString()}")
+                .AddClass(IconClass)
                 .Build();
 
         protected string EndIconClass =>
             new CssBuilder("mud-button-icon-end")
-                .AddClass($"mud-button-icon-size-{_iconProperties.Size.ToDescriptionString()}")
-                .AddClass(_iconProperties.Class)
+                .AddClass($"mud-button-icon-size-{(IconSize ?? Size).ToDescriptionString()}")
+                .AddClass(IconClass)
                 .Build();
-
-        protected override void OnParametersSet()
-        {
-            base.OnParametersSet();
-
-            var hasStartIcon = StartIcon?.AsSpan().Trim().Length > 0;
-            var hasEndIcon = EndIcon.AsSpan().Trim().Length > 0;
-
-            if (IconProperties is not null)
-            {
-                _iconProperties = IconProperties;
-                if (_iconProperties.HasIcon())
-                {
-                    // Backwards compatibility
-
-                    if (hasStartIcon) StartIcon = _iconProperties.Icon;
-                    else if (hasEndIcon) EndIcon = _iconProperties.Icon;
-                }
-            }
-            else
-            {
-                _iconProperties.Icon = hasStartIcon ? StartIcon : hasEndIcon ? EndIcon : string.Empty;
-                _iconProperties.Size = IconSize ?? Size;
-                _iconProperties.Color = IconColor;
-                _iconProperties.Class = IconClass;
-            }
-
-            _iconProperties.Position = hasStartIcon ? Position.Start : hasEndIcon ? Position.End : null;
-        }
-
-
-        IconProperties _iconProperties = new();
-
-        /// <summary>
-        /// The icon properties.
-        /// </summary>
-        [Parameter]
-        [Category(CategoryTypes.Icon.Behavior)]
-        public IconProperties? IconProperties { get; set; }
 
         /// <summary>
         /// Icon placed before the text if set.
